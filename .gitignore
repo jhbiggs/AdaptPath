@@ -1,0 +1,35 @@
+# Xcode
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+DerivedData/
+*.swiftpm/xcod/package.xcworkspace/xcuserdata/
+
+#Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+api_env/
+*.egg-info/
+dist/
+build/
+
+#Model files (optional - can be large)
+*.pkl
+*.mlmodel
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
