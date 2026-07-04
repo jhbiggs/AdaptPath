@@ -11,11 +11,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		5E08D6322FF0F26D00150E40 /* AdaptPath-iOS */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "AdaptPath-iOS";
-			sourceTree = "<group>";
-		};
 		5EF643AD2FBA746A003FC03F /* AdaptPath */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = AdaptPath;
@@ -38,7 +33,6 @@
 			isa = PBXGroup;
 			children = (
 				5EF643AD2FBA746A003FC03F /* AdaptPath */,
-				5E08D6322FF0F26D00150E40 /* AdaptPath-iOS */,
 				5EF643AC2FBA746A003FC03F /* Products */,
 			);
 			sourceTree = "<group>";
