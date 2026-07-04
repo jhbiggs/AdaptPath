@@ -13,6 +13,8 @@ class AccommodationAPI: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
+    private var errorResetTimer: Timer?
+    
     struct Accommodation: Identifiable {
         let id = UUID()
         let name: String
@@ -35,6 +37,7 @@ class AccommodationAPI: ObservableObject {
         isLoading = true
         errorMessage = nil
         recommendations = []
+        errorResetTimer?.invalidate() // Clear any existent timer
         
         let url = URL(string: "http://192.168.1.109:5001/predict")!
         var request = URLRequest(url: url)
@@ -59,11 +62,13 @@ class AccommodationAPI: ObservableObject {
                 
                 if let error = error {
                     self?.errorMessage = "Network error: \(error.localizedDescription)"
+                    self?.scheduleErrorReset()
                     return
                 }
                 
                 guard let data = data else {
-                    self?.errorMessage = "No response from the server"
+                    self?.errorMessage = "No data received"
+                    self?.scheduleErrorReset()
                     return
                 }
                 
@@ -90,12 +95,19 @@ class AccommodationAPI: ObservableObject {
                         }
                     } else {
                         self?.errorMessage = response.error ?? "API error"
+                        self?.scheduleErrorReset()
                     }
                 } catch {
-                    print("\(String(data: data, encoding: .utf8) ?? "None")")
-                    self?.errorMessage  = "Decoding error: \(error.localizedDescription). The response was: \(String(data: data, encoding: .utf8) ?? "None")"
+                    self?.errorMessage  = "Decoding error: \(error.localizedDescription)."
+                    self?.scheduleErrorReset()
                 }
             }
         }.resume()
+    }
+    
+    private func scheduleErrorReset() {
+        errorResetTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { [weak self] _ in
+            self?.errorMessage = nil
+        }
     }
 }

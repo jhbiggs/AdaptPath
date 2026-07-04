@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var attention = 1
     @State private var social = 2
     @State private var motor = 3
+    @State private var showRecommendations = false
     
     let diagnoses = ["ADHD", "Dyslexia", "Dyscalculia", "Autism"]
     let grades = [1, 2, 3, 4, 5]
@@ -24,147 +25,178 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack {
-            Form {
-                Section ("Student Information") {
-                    Picker("Grade", selection: $grade) {
-                        ForEach(grades, id: \.self) { g in
-                            Text("Grade \(g)").tag(g)
-                        }
-                    }
-                }
-                
-                Picker("Primary Diagnosis", selection: $diagnosis) {
-                    ForEach(diagnoses, id: \.self) { d in
-                        Text(d).tag(d)
-                    }
-                }
-            }
-            
-            Section ("Academic Skills") {
-                HStack {
-                    Text("Reading Fluency")
-                    Spacer()
-                    Picker("", selection: $reading) {
-                        Text("Low").tag(1)
-                        Text("Average").tag(2)
-                        Text("Above Average").tag(3)
-                    }
-                    .pickerStyle(.segmented)
-                }
-                
-                HStack {
-                    Text("Math Skill")
-                    Spacer()
-                    Picker("", selection: $math){
-                        Text("Low").tag(1)
-                        Text("Average").tag(2)
-                        Text("Above Average").tag(3)
-                    }
-                    .pickerStyle(.segmented)
-                }
-            }
-            
-            Section ("Behavioral & Physical"){
-                HStack {
-                    Text("Attention Level")
-                    Spacer()
-                    Picker("", selection: $attention) {
-                        Text("Low").tag(1)
-                        Text("Average").tag(2)
-                        Text("Above Average").tag(3)
-                    }
-                    .pickerStyle(.segmented)
-                }
-                
-                HStack {
-                    Text("Social Skills")
-                    Spacer()
-                    Picker("", selection: $social) {
-                        Text("Low").tag(1)
-                        Text("Average").tag(2)
-                        Text("Above Average").tag(3)
-                    }
-                    .pickerStyle(.segmented)
-                }
-                
-                HStack {
-                    Text("Motor Skills")
-                    Spacer()
-                    Picker("", selection: $motor) {
-                        Text("Low").tag(1)
-                        Text("Average").tag(2)
-                        Text("Above Average").tag(3)
-                    }
-                    .pickerStyle(.segmented)
-                }
-            }
-            
-            Section {
-                Button (action: {
-                    api.predictAccommodations(grade: grade, diagnosis: diagnosis, reading: reading, math: math, attention: attention, social: social, motor: motor)
-                }) {
-                    if api.isLoading {
-                        HStack {
-                            ProgressView()
-                            Text("Predicting...")
-                        }
-                    } else {
-                        Text ("Get Recommendations")
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-                .disabled(api.isLoading)
-            }
-        }
-        .navigationTitle("AdaptPath")
-        
-        if let error = api.errorMessage {
-            VStack{
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(Color.red)
-                Text(error)
-                    .foregroundStyle(.red)
-            }
-            .padding()
-        }
-        
-        if !api.recommendations.isEmpty {
-            VStack (alignment: .leading, spacing: 12) {
-                Text("Recommended Accommodations")
-                    .font(.headline)
-                    .padding(.horizontal)
-                
-                ForEach(api.recommendations) { accommodation in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(accommodation.name)
-                                .font(.body)
-                                .fontWeight(.semibold)
-                            Text("Confidence: \(accommodation.confidencePercent)")
-                                .font(.caption) .foregroundStyle(.gray)
-                        }
-                        
-                        Spacer()
-                        
-                        ZStack {
-                            Circle()
-                                .fill(Color.blue.opacity(0.2))
+            Group {
+                if showRecommendations && !api.recommendations.isEmpty {
+                    RecommendationsView(recommendations: api.recommendations, showRecommendations: $showRecommendations)
+                } else {
+                    Form {
+                        Section("Student Information") {
+                            Picker("Grade", selection: $grade) {
+                                ForEach(grades, id: \.self) { g in
+                                    Text("Grade \(g)").tag(g)
+                                }
+                            }
                             
-                            Text(accommodation.confidencePercent)
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.blue)
+                            Picker("Primary Diagnosis", selection: $diagnosis) {
+                                ForEach(diagnoses, id: \.self) { d in
+                                    Text(d).tag(d)
+                                }
+                            }
                         }
-                        .frame(width: 50, height: 50)
+                        
+                        Section("Academic Skills") {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack {
+                                    Text("Reading Fluency")
+                                    Spacer()
+                                    Picker("", selection: $reading) {
+                                        Text("Low").tag(1)
+                                        Text("Average").tag(2)
+                                        Text("Above Average").tag(3)
+                                    }
+                                    .pickerStyle(.menu)
+                                }
+                                
+                                HStack {
+                                    Text("Math Skill")
+                                    Spacer()
+                                    Picker("", selection: $math){
+                                        Text("Low").tag(1)
+                                        Text("Average").tag(2)
+                                        Text("Above Average").tag(3)
+                                    }
+                                    .pickerStyle(.menu)
+                                }
+                            }
+                        }
+                        
+                        Section("Behavioral & Physical") {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack {
+                                    Text("Attention Level")
+                                    Spacer()
+                                    Picker("", selection: $attention) {
+                                        Text("Low").tag(1)
+                                        Text("Average").tag(2)
+                                        Text("Above Average").tag(3)
+                                    }
+                                    .pickerStyle(.menu)
+                                }
+                                
+                                HStack {
+                                    Text("Social Skills")
+                                    Spacer()
+                                    Picker("", selection: $social) {
+                                        Text("Low").tag(1)
+                                        Text("Average").tag(2)
+                                        Text("Above Average").tag(3)
+                                    }
+                                    .pickerStyle(.menu)
+                                }
+                                
+                                HStack {
+                                    Text("Motor Skills")
+                                    Spacer()
+                                    Picker("", selection: $motor) {
+                                        Text("Low").tag(1)
+                                        Text("Average").tag(2)
+                                        Text("Above Average").tag(3)
+                                    }
+                                    .pickerStyle(.menu)
+                                }
+                            }
+                        }
+                        
+                        Section {
+                            Button(action: {
+                                api.predictAccommodations(grade: grade, diagnosis: diagnosis, reading: reading, math: math, attention: attention, social: social, motor: motor)
+                            }) {
+                                if api.isLoading {
+                                    HStack {
+                                        ProgressView()
+                                        Text("Predicting...")
+                                    }
+                                } else {
+                                    Text("Get Recommendations")
+                                        .frame(maxWidth: .infinity)
+                                }
+                            }
+                            .disabled(api.isLoading)
+                        }
                     }
-                    .padding()
-                    .background(.gray.opacity(0.2))
-                    .cornerRadius(8)
-                    .padding(.horizontal)
                 }
             }
-            .padding(.vertical)
+            .onChange(of: api.recommendations.count) { oldValue, newValue in
+                if newValue > 0 {
+                    showRecommendations = true
+                }
+            }
+            .navigationTitle("AdaptPath")
         }
+    }
+}
+
+struct RecommendationsView: View {
+    let recommendations: [AccommodationAPI.Accommodation]
+    @Binding var showRecommendations: Bool
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Button(action: {
+                    showRecommendations = false
+                }) {
+                    HStack {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                }
+                Spacer()
+            }
+            .padding(.horizontal)
+            
+            Text("Recommended Accommodations")
+                .font(.headline)
+                .padding(.horizontal)
+            
+            ScrollView {
+                VStack(spacing: 12) {
+                    ForEach(recommendations) { accommodation in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(accommodation.name)
+                                    .font(.body)
+                                    .fontWeight(.semibold)
+                                Text("Confidence: \(accommodation.confidencePercent)")
+                                    .font(.caption)
+                                    .foregroundStyle(.gray)
+                            }
+                            
+                            Spacer()
+                            
+                            ZStack {
+                                Circle()
+                                    .fill(Color.blue.opacity(0.2))
+                                
+                                Text(accommodation.confidencePercent)
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.blue)
+                            }
+                            .frame(width: 50, height: 50)
+                        }
+                        .padding()
+                        .background(.gray.opacity(0.2))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                    }
+                }
+            }
+            
+            Spacer()
+        }
+        .padding(.vertical)
     }
 }
 
